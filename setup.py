@@ -25,5 +25,5 @@ setup(
         "Intended Audience :: Developers",
         "Topic :: Scientific/Engineering"
     ],
-    install_requires=["python-can"]
+    install_requires=["python-can>=2.0.0rc1"]
 )

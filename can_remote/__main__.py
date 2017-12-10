@@ -14,7 +14,8 @@ can.set_logging_level("DEBUG")
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Remote CAN server")
+    parser = argparse.ArgumentParser("python -m can_server",
+                                     description="Remote CAN server")
 
     parser.add_argument('-v', action='count', dest="verbosity",
                         help='''How much information do you want to see at the command line?
