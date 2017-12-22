@@ -25,5 +25,8 @@ setup(
         "Intended Audience :: Developers",
         "Topic :: Scientific/Engineering"
     ],
+    package_data={
+        "can_remote": ["web/index.html", "web/assets/*"]
+    },
     install_requires=["python-can>=2.0.0rc1"]
 )
