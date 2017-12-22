@@ -1,0 +1,2 @@
+include can_remote/web/index.html
+include can_remote/web/assets/*
