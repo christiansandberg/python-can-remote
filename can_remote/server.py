@@ -11,7 +11,7 @@ except ImportError:
     from SocketServer import ThreadingMixIn
 
 import can
-from can.interfaces.remote import DEFAULT_PORT
+from . import DEFAULT_PORT
 from .protocol import RemoteProtocolBase
 from .websocket import WebSocket, WebsocketClosed, get_accept_key
 
