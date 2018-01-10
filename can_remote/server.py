@@ -106,7 +106,7 @@ class ClientRequestHandler(BaseHTTPRequestHandler):
         self.server.clients.remove(protocol)
 
     def send_trace_webpage(self):
-        path = os.path.join(os.path.dirname(__file__), "web", self.path[1:])
+        path = os.path.dirname(__file__) + "/web" + self.path
         if path.endswith("/"):
             path = path + "index.html"
         # Prefer compressed files
