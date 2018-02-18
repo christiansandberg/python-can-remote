@@ -25,12 +25,12 @@ Create python-can bus:
 .. code-block:: python
 
     import can
-    import can_remote
 
     # Create a connection to server. Any config is passed to server.
-    bus = can_remote.RemoteBus('ws://localhost:54701/',
-                               bitrate=500000,
-                               receive_own_messages=True)
+    bus = can.Bus('ws://localhost:54701/',
+                  bustype='remote',
+                  bitrate=500000,
+                  receive_own_messages=True)
 
     # Send messages
     msg = can.Message(arbitration_id=0x12345, data=[1,2,3,4,5,6,7,8])
