@@ -29,9 +29,9 @@ setup(
         "can_remote": ["web/index.html", "web/assets/*"]
     },
     entry_points={
-        "python_can.interface": [
+        "can.interface": [
             "remote=can_remote.client:RemoteBus",
         ]
     },
-    install_requires=["python-can>=2.1.0"]
+    install_requires=["python-can>=2.2.0"]
 )
