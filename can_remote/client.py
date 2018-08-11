@@ -33,8 +33,12 @@ class RemoteBus(can.bus.BusABC):
         websocket = WebSocket(url, ["can.binary+json.v1", "can.json.v1"],
                               ssl_context=ssl_context)
         self.protocol = RemoteClientProtocol(config, websocket)
+        self.socket = websocket.socket
         self.channel_info = self.protocol.channel_info
         self.channel = channel
+
+    def fileno(self):
+        return self.socket.fileno()
 
     def recv(self, timeout=None):
         """Block waiting for a message from the Bus.
