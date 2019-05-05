@@ -12,6 +12,13 @@ LOGGER = logging.getLogger(__name__)
 BINARY_MSG_STRUCT = struct.Struct(">dIBB")
 BINARY_MESSAGE_TYPE = 1
 
+IS_EXTENDED_ID = 0x1
+IS_REMOTE_FRAME = 0x2
+IS_ERROR_FRAME = 0x4
+IS_FD = 0x8
+IS_BRS = 0x10
+IS_ESI = 0x20
+
 
 class RemoteProtocolBase(object):
 
@@ -31,9 +38,12 @@ class RemoteProtocolBase(object):
                     return Message(timestamp=timestamp,
                                    arbitration_id=arb_id,
                                    dlc=dlc,
-                                   extended_id=bool(flags & 0x1),
-                                   is_remote_frame=bool(flags & 0x2),
-                                   is_error_frame=bool(flags & 0x4),
+                                   is_extended_id=bool(flags & IS_EXTENDED_ID),
+                                   is_remote_frame=bool(flags & IS_REMOTE_FRAME),
+                                   is_error_frame=bool(flags & IS_ERROR_FRAME),
+                                   is_fd=bool(flags & IS_FD),
+                                   bitrate_switch=bool(flags & IS_BRS),
+                                   error_state_indicator=bool(flags & IS_ESI),
                                    data=data[15:])
                 else:
                     return None
@@ -58,12 +68,18 @@ class RemoteProtocolBase(object):
     def send_msg(self, msg):
         if self._use_binary:
             flags = 0
-            if msg.id_type:
-                flags |= 0x1
+            if msg.is_extended_id:
+                flags |= IS_EXTENDED_ID
             if msg.is_remote_frame:
-                flags |= 0x2
+                flags |= IS_REMOTE_FRAME
             if msg.is_error_frame:
-                flags |= 0x4
+                flags |= IS_ERROR_FRAME
+            if msg.is_fd:
+                flags |= IS_FD
+            if msg.bitrate_switch:
+                flags |= IS_BRS
+            if msg.error_state_indicator:
+                flags |= IS_ESI
             data = BINARY_MSG_STRUCT.pack(msg.timestamp,
                                           msg.arbitration_id,
                                           msg.dlc,
@@ -76,12 +92,16 @@ class RemoteProtocolBase(object):
             payload = {
                 "timestamp": msg.timestamp,
                 "arbitration_id": msg.arbitration_id,
-                "extended_id": msg.id_type,
+                "is_extended_id": msg.is_extended_id,
                 "is_remote_frame": msg.is_remote_frame,
                 "is_error_frame": msg.is_error_frame,
                 "dlc": msg.dlc,
                 "data": list(msg.data),
             }
+            if msg.is_fd:
+                payload["is_fd"] = True
+                payload["bitrate_switch"] = msg.bitrate_switch
+                payload["error_state_indicator"] = msg.error_state_indicator
             self.send("message", payload)
 
     def send_error(self, exc):

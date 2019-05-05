@@ -28,13 +28,14 @@ function onConnect(bus) {
 */
     bus.send({
         arbitration_id: 0x6ef,
-        extended_id: false,
+        is_extended_id: false,
         is_remote_frame: true,
         dlc: 8
     });
 
     bus.send({
         arbitration_id: 0xabcdef,
+        is_extended_id: true,
         is_error_frame: true
     });
 }

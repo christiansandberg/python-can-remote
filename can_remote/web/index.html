@@ -99,7 +99,7 @@
                             </template>
                         </td>
                         <td class="can-id">
-                            {{ msg.arbitration_id.toString(16).toUpperCase() }}<template v-if="msg.extended_id">x</template>
+                            {{ msg.arbitration_id.toString(16).toUpperCase() }}<template v-if="msg.is_extended_id">x</template>
                         </td>
                         <td class="dlc">
                             {{ msg.dlc }}
