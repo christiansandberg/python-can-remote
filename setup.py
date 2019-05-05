@@ -33,5 +33,5 @@ setup(
             "remote=can_remote.client:RemoteBus",
         ]
     },
-    install_requires=["python-can>=2.2.0"]
+    install_requires=["python-can>=3.0.0"]
 )
