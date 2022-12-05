@@ -55,6 +55,10 @@ class RemoteServer(ThreadingMixIn, HTTPServer):
         self.clients = []
         HTTPServer.__init__(self, address, ClientRequestHandler)
         logger.info("Server listening on %s:%d", address[0], address[1])
+        try:
+            self.bus = can.interface.Bus(**config)
+        except Exception as exc:
+            raise
         if ssl_context:
             self.socket = ssl_context.wrap_socket(self.socket, server_side=True)
             scheme_suffix = "s"
@@ -64,6 +68,28 @@ class RemoteServer(ThreadingMixIn, HTTPServer):
                     scheme_suffix, self.server_port)
         logger.info("Open browser to 'http%s://localhost:%d/'",
                     scheme_suffix, self.server_port)
+    
+        self.running = True
+        self._send_thread = threading.Thread(target=self._send_to_client)
+        self._send_thread.daemon = True
+        self._send_thread.start()
+
+
+    def _send_to_client(self):
+        """Continuously read CAN messages and send to client."""
+        while self.running:
+            try:
+                msg = self.bus.recv(0.5)
+            except Exception as e:
+                logger.exception(e)
+                for client in self.clients:
+                    client.send_error(e)
+            else:
+                if msg is not None:
+                    for client in self.clients:
+                        client.send_msg(msg)
+        logger.info('Disconnecting from CAN bus')
+        self.bus.shutdown()
 
 
 class ClientRequestHandler(BaseHTTPRequestHandler):
@@ -98,7 +124,7 @@ class ClientRequestHandler(BaseHTTPRequestHandler):
         self.end_headers()
 
         websocket = WebSocket(None, protocol, sock=self.request)
-        protocol = RemoteServerProtocol(self.server.config, websocket)
+        protocol = RemoteServerProtocol(self.server.bus, websocket)
         self.server.clients.append(protocol)
         protocol.run()
         logger.info("Closing connection to %s", self.address_string())
@@ -129,56 +155,30 @@ class ClientRequestHandler(BaseHTTPRequestHandler):
 
 class RemoteServerProtocol(RemoteProtocolBase):
 
-    def __init__(self, config, websocket):
+    def __init__(self, bus, websocket):
         super(RemoteServerProtocol, self).__init__(websocket)
         event = self.recv()
         if not event or event["type"] != "bus_request":
             print(event)
             raise RemoteServerError("Client did not send a bus request")
-        new_config = {}
-        new_config.update(event["payload"]["config"])
-        logger.info("Config received: %r", new_config)
-        new_config.update(config)
-        self.config = new_config
-        try:
-            self.bus = can.interface.Bus(**new_config)
-        except Exception as exc:
-            self.terminate(exc)
-            raise
+
+        self.bus = bus
+
         logger.info("Connected to bus '%s'", self.bus.channel_info)
         self.send_bus_response(self.bus.channel_info)
         self.running = True
         self._send_tasks = {}
-        self._send_thread = threading.Thread(target=self._send_to_client)
-        self._send_thread.daemon = True
 
     def send_bus_response(self, channel_info):
         self.send("bus_response", {"channel_info": channel_info})
 
     def run(self):
-        self._send_thread.start()
         try:
             self._receive_from_client()
         except Exception as exc:
             self.terminate(exc)
         finally:
             self.running = False
-            if self._send_thread.is_alive():
-                self._send_thread.join(3)
-
-    def _send_to_client(self):
-        """Continuously read CAN messages and send to client."""
-        while self.running:
-            try:
-                msg = self.bus.recv(0.5)
-            except Exception as e:
-                logger.exception(e)
-                self.send_error(e)
-            else:
-                if msg is not None:
-                    self.send_msg(msg)
-        logger.info('Disconnecting from CAN bus')
-        self.bus.shutdown()
 
     def _receive_from_client(self):
         """Continuously read events from socket and send messages on CAN bus."""
