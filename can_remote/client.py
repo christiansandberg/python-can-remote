@@ -108,10 +108,10 @@ class RemoteClientProtocol(RemoteProtocolBase):
     def send_bus_request(self, config):
         self.send("bus_request", {"config": config})
 
-    def send_periodic_start(self, msg, period, duration):
+    def send_periodic_start(self, msg: can, period, duration):
         msg_payload = {
             "arbitration_id": msg.arbitration_id,
-            "extended_id": msg.id_type,
+            "is_extended_id": msg.is_extended_id,
             "is_remote_frame": msg.is_remote_frame,
             "is_error_frame": msg.is_error_frame,
             "dlc": msg.dlc,
@@ -143,9 +143,10 @@ class CyclicSendTask(can.broadcastmanager.LimitedDurationCyclicSendTaskABC,
         self.start()
 
     def start(self):
-        self.bus.protocol.send_periodic_start(self.message,
-                                              self.period,
-                                              self.duration)
+        for msg in self.messages:
+            self.bus.protocol.send_periodic_start(msg,
+                                                  self.period,
+                                                  self.duration)
 
     def stop(self):
         self.bus.protocol.send_periodic_stop(self.message.arbitration_id)
