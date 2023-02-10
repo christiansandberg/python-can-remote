@@ -108,7 +108,7 @@ class RemoteClientProtocol(RemoteProtocolBase):
     def send_bus_request(self, config):
         self.send("bus_request", {"config": config})
 
-    def send_periodic_start(self, msg: can, period, duration):
+    def send_periodic_start(self, msg: can.Message, period: float, duration: float):
         msg_payload = {
             "arbitration_id": msg.arbitration_id,
             "is_extended_id": msg.is_extended_id,
