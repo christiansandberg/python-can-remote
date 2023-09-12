@@ -89,6 +89,9 @@ class RemoteBus(can.bus.BusABC):
                 break
             except RemoteError:
                 pass
+        # Shutdown on parent side for proper state 
+        # (like _is_shutdown flag must be False when shutdown is finished)
+        super().shutdown()
         logger.debug('Network connection closed')
 
 
