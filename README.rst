@@ -53,3 +53,13 @@ It is available on the same address using HTTP, e.g. http://localhost:54701/.
 
 
 .. _python-can: https://python-can.readthedocs.org/en/stable/
+
+dev 分支改动
+------------
+
+这个分支在`master@0.2.1`基础上做了一些修改, 具体改动如下:
+
+1. 启动 `RemoteServer` 后立即打开 `target_bus`, 并从 `target_bus` 中 `recv message`.
+2. `recv` 有效 `message` 后, 遍历所有 `connected client list`, 并分发 `message`
+3. 当有 `client` 连上后, 放入 `connected client list`
+4. `client` 关闭后, 从 `connected client list` 中移除.
