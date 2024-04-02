@@ -32,7 +32,7 @@ class RemoteBus(can.bus.BusABC):
             ssl_context = DEFAULT_SSL_CONTEXT
         websocket = WebSocket(url, ["can.binary+json.v1", "can.json.v1"],
                               ssl_context=ssl_context)
-        self.protocol = RemoteClientProtocol(config, websocket)
+        self._can_protocol = RemoteClientProtocol(config, websocket)
         self.socket = websocket.socket
         self.channel_info = self.protocol.channel_info
         self.channel = channel
