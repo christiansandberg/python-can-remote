@@ -32,9 +32,9 @@ class RemoteBus(can.bus.BusABC):
             ssl_context = DEFAULT_SSL_CONTEXT
         websocket = WebSocket(url, ["can.binary+json.v1", "can.json.v1"],
                               ssl_context=ssl_context)
-        self._can_protocol = RemoteClientProtocol(config, websocket)
+        self.remote_protocol = RemoteClientProtocol(config, websocket)
         self.socket = websocket.socket
-        self.channel_info = self.protocol.channel_info
+        self.channel_info = self.remote_protocol.channel_info
         self.channel = channel
 
     def fileno(self):
@@ -50,7 +50,7 @@ class RemoteBus(can.bus.BusABC):
         :rtype: can.Message
         :raises can.interfaces.remote.protocol.RemoteError:
         """
-        event = self.protocol.recv(timeout)
+        event = self.remote_protocol.recv(timeout)
         if isinstance(event, can.Message):
             return event
         return None
@@ -60,7 +60,7 @@ class RemoteBus(can.bus.BusABC):
 
         :param can.Message msg: A Message object.
         """
-        self.protocol.send_msg(msg)
+        self.remote_protocol.send_msg(msg)
 
     def send_periodic(self, message, period, duration=None):
         """Start sending a message at a given period on the remote bus.
@@ -81,10 +81,10 @@ class RemoteBus(can.bus.BusABC):
         """Close socket connection."""
         # Give threads a chance to finish up
         logger.debug('Closing connection to server')
-        self.protocol.close()
+        self.remote_protocol.close()
         while True:
             try:
-                self.protocol.recv(1)
+                self.remote_protocol.recv(1)
             except WebsocketClosed:
                 break
             except RemoteError:
