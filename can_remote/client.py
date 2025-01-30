@@ -36,6 +36,7 @@ class RemoteBus(can.bus.BusABC):
         self.socket = websocket.socket
         self.channel_info = self.remote_protocol.channel_info
         self.channel = channel
+        super().__init__(channel)
 
     def fileno(self):
         return self.socket.fileno()
