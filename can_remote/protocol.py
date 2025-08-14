@@ -51,12 +51,12 @@ class RemoteProtocolBase(object):
             if not isinstance(event, dict):
                 raise TypeError("Message is not a dictionary")
             if "type" not in event:
-                raise ValueError("Message must contain a 'type' key")
+                raise NoTypeError("Message must contain a 'type' key")
             if event["type"] == "error":
                 raise RemoteError(event["payload"])
             if event["type"] == "message":
                 return Message(**event["payload"])
-        except (ValueError, TypeError, KeyError) as exc:
+        except (NoTypeError, TypeError, KeyError) as exc:
             LOGGER.warning("An error occurred: %s", exc)
             self.send_error(exc)
             return None
@@ -115,4 +115,8 @@ class RemoteProtocolBase(object):
 
 
 class RemoteError(CanError):
+    pass
+
+
+class NoTypeError(ValueError):
     pass
