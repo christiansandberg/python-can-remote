@@ -80,6 +80,11 @@ class RemoteBus(can.bus.BusABC):
 
     def shutdown(self):
         """Close socket connection."""
+
+        if self._is_shutdown:
+            logger.debug("%s is already shut down", self.__class__)
+            return
+        
         # Give threads a chance to finish up
         logger.debug('Closing connection to server')
         self.remote_protocol.close()
