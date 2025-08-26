@@ -9,7 +9,7 @@
     "build": "cross-env NODE_ENV=production webpack --progress --hide-modules"
   },
   "dependencies": {
-    "bootstrap": "^3.3.7",
+    "bootstrap": "^3.4.1",
     "lodash": "^4.17.11",
     "python-can-remote": "^0.3.0",
     "vue": "^2.6.10"
