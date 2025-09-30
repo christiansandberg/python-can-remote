@@ -122,6 +122,8 @@ class RemoteClientProtocol(RemoteProtocolBase):
             "is_extended_id": msg.is_extended_id,
             "is_remote_frame": msg.is_remote_frame,
             "is_error_frame": msg.is_error_frame,
+            "is_fd": msg.is_fd,
+            "bitrate_switch": msg.bitrate_switch,
             "dlc": msg.dlc,
             "data": list(msg.data),
         }
