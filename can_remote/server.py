@@ -205,7 +205,8 @@ class RemoteServerProtocol(RemoteProtocolBase):
                                                   event["payload"].get("duration"))
                     self._send_tasks[arb_id] = task
             elif event["type"] == "periodic_stop":
-                self._send_tasks[event["payload"]].stop()
+                task = self._send_tasks.pop(event["payload"])
+                task.stop()
 
 
 class RemoteServerError(Exception):

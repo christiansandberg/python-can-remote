@@ -63,20 +63,19 @@ class RemoteBus(can.bus.BusABC):
         """
         self.remote_protocol.send_msg(msg)
 
-    def send_periodic(self, message, period, duration=None):
-        """Start sending a message at a given period on the remote bus.
-
-        :param can.Message msg:
-            Message to transmit
-        :param float period:
-            Period in seconds between each message
-        :param float duration:
-            The duration to keep sending this message at given rate. If
-            no duration is provided, the task will continue indefinitely.
-
-        :return: A started task instance
-        """
-        return CyclicSendTask(self, message, period, duration)
+    def _send_periodic_internal(
+        self,
+        msgs,
+        period,
+        duration = None,
+        autostart = True,
+        modifier_callback = None,
+    ):
+        """Start sending a message at a given period on the remote bus."""
+        task = CyclicSendTask(self, msgs, period, duration)
+        if autostart:
+            task.start()
+        return task
 
     def shutdown(self):
         """Close socket connection."""
@@ -84,7 +83,7 @@ class RemoteBus(can.bus.BusABC):
         if self._is_shutdown:
             logger.debug("%s is already shut down", self.__class__)
             return
-        
+
         # Give threads a chance to finish up
         logger.debug('Closing connection to server')
         self.remote_protocol.close()
@@ -123,6 +122,8 @@ class RemoteClientProtocol(RemoteProtocolBase):
             "is_extended_id": msg.is_extended_id,
             "is_remote_frame": msg.is_remote_frame,
             "is_error_frame": msg.is_error_frame,
+            "is_fd": msg.is_fd,
+            "bitrate_switch": msg.bitrate_switch,
             "dlc": msg.dlc,
             "data": list(msg.data),
         }
@@ -141,28 +142,30 @@ class CyclicSendTask(can.broadcastmanager.LimitedDurationCyclicSendTaskABC,
                      can.broadcastmanager.RestartableCyclicTaskABC,
                      can.broadcastmanager.ModifiableCyclicTaskABC):
 
-    def __init__(self, bus, message, period, duration=None):
+    def __init__(self, bus, messages, period, duration=None):
         """
         :param bus: The remote connection to use.
         :param message: The message to be sent periodically.
         :param period: The rate in seconds at which to send the message.
         """
+        assert isinstance(bus, RemoteBus)
         self.bus = bus
-        super(CyclicSendTask, self).__init__(message, period, duration)
-        self.start()
+        super(CyclicSendTask, self).__init__(messages, period, duration)
 
     def start(self):
         for msg in self.messages:
-            self.bus.protocol.send_periodic_start(msg,
+            self.bus.remote_protocol.send_periodic_start(msg,
                                                   self.period,
                                                   self.duration)
 
     def stop(self):
-        self.bus.protocol.send_periodic_stop(self.message.arbitration_id)
+        for msg in self.messages:
+            self.bus.remote_protocol.send_periodic_stop(msg.arbitration_id)
 
-    def modify_data(self, message):
-        assert message.arbitration_id == self.message.arbitration_id
-        self.message = message
-        self.bus.protocol.send_periodic_start(self.message,
-                                              self.period,
-                                              self.duration)
+    def modify_data(self, messages):
+        self.stop()
+        super(self).modify_data(messages)
+        for msg in self.messages:
+            self.bus.remote_protocol.send_periodic_start(msg,
+                                                self.period,
+                                                self.duration)
