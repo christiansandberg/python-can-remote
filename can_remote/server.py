@@ -47,6 +47,10 @@ class RemoteServer(ThreadingMixIn, HTTPServer):
             CAN interface to use.
         :param int bitrate:
             Forced bitrate in bits/s.
+        :param int data_bitrate
+            Forced data_bitrate in bits/s.
+        :param int fd
+            Forced enable of fd.
         """
         address = (host, port)
         self.config = config
