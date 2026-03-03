@@ -62,6 +62,33 @@
                                         <option>1000000</option>
                                     </select>
                                 </div>
+                                <div class="form-group">
+                                    <label for="data-bitrate" class="control-label">Data Bitrate</label>
+                                    <select v-model="dataBitrate" id="data-bitrate" class="form-control">
+                                        <option>125000</option>
+                                        <option>250000</option>
+                                        <option>500000</option>
+                                        <option>1000000</option>
+                                        <option>2000000</option>
+                                        <option>3000000</option>
+                                        <option>4000000</option>
+                                        <option>5000000</option>
+                                        <option>6000000</option>
+                                        <option>7000000</option>
+                                        <option>8000000</option>
+                                        <option>9000000</option>
+                                        <option>10000000</option>
+                                        <option>11000000</option>
+                                        <option>12000000</option>
+                                        <option>13000000</option>
+                                        <option>14000000</option>
+                                        <option>15000000</option>
+                                    </select>
+                                </div>
+                                <div class="form-check">
+                                    <input v-model="canFd" type="checkbox" id="can-fd" class="form-check-input"></input>
+                                    <label for="can-fd" class="form-check-label">CAN-FD Support</label>
+                                </div>
                             </fieldset>
                         </div>
                     </div><!-- /.modal-content -->
