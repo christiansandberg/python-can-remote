@@ -93,6 +93,8 @@ var app = new Vue({
         allMessages: false,
         showConfig: false,
         bitrate: '500000',
+        dataBitrate: '10000000',
+        canFd: false,
         channelInfo: '',
         messages: [],
         error: null
@@ -102,6 +104,8 @@ var app = new Vue({
             this.clear();
             var config = {
                 bitrate: parseInt(this.bitrate),
+                data_bitrate: parseInt(this.dataBitrate),
+                fd: Boolean(this.canFd),
                 receive_own_messages: true
             };
             var bus = this.bus = new Bus(this.url, config);
