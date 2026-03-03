@@ -36,6 +36,14 @@ def main():
                         help='''Force to use a specific bitrate.
                         This will override any requested bitrate by the clients.''')
 
+    parser.add_argument('--data-bitrate', type=int,
+                        help='''Force to use a specific bitrate for data segment.
+                        This will override any requested data bitrate by the clients.''')
+
+    parser.add_argument('--fd', action=argparse.BooleanOptionalAction,
+                        help='''Force setting of CAN-FD enablement.
+                        This will override any requested FD setting by the clients.''')
+
     parser.add_argument('-H', '--host',
                         help='''Host to listen to (default 0.0.0.0).''',
                         default='0.0.0.0')
@@ -65,6 +73,10 @@ def main():
         config["bustype"] = results.interface
     if results.bitrate:
         config["bitrate"] = results.bitrate
+    if results.data_bitrate:
+        config["data_bitrate"] = results.data_bitrate
+    if results.fd:
+        config["fd"] = results.fd
 
     if results.cert and ssl is not None:
         context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
