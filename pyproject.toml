@@ -1,0 +1,45 @@
+[build-system]
+requires = ["setuptools>=61.0", "setuptools_scm>=7.1"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "python-can-remote"
+description = "CAN over network bridge for Python"
+readme = { file = "README.rst", content-type = "text/x-rst" }
+authors = [
+    { name = "Christian Sandberg", email = "christiansandberg@me.com" }
+]
+license = { text = "MIT" }
+keywords = ["CAN", "TCP", "websocket"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 2",
+    "Programming Language :: Python :: 3",
+    "Intended Audience :: Developers",
+    "Topic :: Scientific/Engineering"
+]
+urls = { Homepage = "https://github.com/christiansandberg/python-can-remote" }
+dependencies = [
+    "python-can>=3.0.0"
+]
+dynamic = ["version"]
+
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools_scm]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["can_remote*"]
+
+[tool.setuptools.package-data]
+"can_remote" = [
+    "web/index.html",
+    "web/assets/*"
+]
+
+[project.entry-points."can.interface"]
+remote = "can_remote.client:RemoteBus"
